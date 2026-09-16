@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full bg-slate-950">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChessMind - Creado por Juan Rodriguero (11 años)</title>
+  
+  <!-- Tailwind CSS & FontAwesome -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Custom Styles & Dynamic Themes -->
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+    
+    * {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+
+    /* Dynamic Board Themes */
+    .theme-wood .sq-light { background-color: #f0d9b5; color: #b58863; }
+    .theme-wood .sq-dark { background-color: #b58863; color: #f0d9b5; }
+
+    .theme-emerald .sq-light { background-color: #e2e8f0; color: #047857; }
+    .theme-emerald .sq-dark { background-color: #059669; color: #e2e8f0; }
+
+    .theme-cyberpunk .sq-light { background-color: #f472b6; color: #581c87; }
+    .theme-cyberpunk .sq-dark { background-color: #7e22ce; color: #f472b6; }
+
+    .theme-ocean .sq-light { background-color: #e0f2fe; color: #0369a1; }
+    .theme-ocean .sq-dark { background-color: #0284c7; color: #e0f2fe; }
+
+    .theme-midnight .sq-light { background-color: #475569; color: #0f172a; }
+    .theme-midnight .sq-dark { background-color: #1e293b; color: #94a3b8; }
+
+    .theme-gold .sq-light { background-color: #fef08a; color: #854d0e; }
+    .theme-gold .sq-dark { background-color: #ca8a04; color: #fef08a; }
+
+    .theme-rose .sq-light { background-color: #fbcfe8; color: #9d174d; }
+    .theme-rose .sq-dark { background-color: #db2777; color: #fbcfe8; }
+
+    .theme-monochrome .sq-light { background-color: #e2e8f0; color: #1e293b; }
+    .theme-monochrome .sq-dark { background-color: #334155; color: #f8fafc; }
+
+    .theme-neon .sq-light { background-color: #a7f3d0; color: #064e3b; }
+    .theme-neon .sq-dark { background-color: #10b981; color: #022c22; }
+
+    .theme-sunset .sq-light { background-color: #fed7aa; color: #c2410c; }
+    .theme-sunset .sq-dark { background-color: #ea580c; color: #ffedd5; }
+
+    .theme-amethyst .sq-light { background-color: #e9d5ff; color: #6b21a8; }
+    .theme-amethyst .sq-dark { background-color: #9333ea; color: #f3e8ff; }
+
+    .theme-ruby .sq-light { background-color: #fecdd3; color: #9f1239; }
+    .theme-ruby .sq-dark { background-color: #e11d48; color: #ffe4e6; }
+
+    .theme-forest .sq-light { background-color: #dcfce7; color: #14532d; }
+    .theme-forest .sq-dark { background-color: #16a34a; color: #f0fdf4; }
+
+    .theme-slate .sq-light { background-color: #cbd5e1; color: #334155; }
+    .theme-slate .sq-dark { background-color: #64748b; color: #f1f5f9; }
+
+    .theme-coral .sq-light { background-color: #ffe4e6; color: #9f1239; }
+    .theme-coral .sq-dark { background-color: #fb7185; color: #fff1f2; }
+
+    .theme-amber .sq-light { background-color: #fef3c7; color: #78350f; }
+    .theme-amber .sq-dark { background-color: #d97706; color: #fffbeb; }
+
+    .theme-ice .sq-light { background-color: #f0f9ff; color: #0369a1; }
+    .theme-ice .sq-dark { background-color: #38bdf8; color: #f0f9ff; }
+
+    .theme-lava .sq-light { background-color: #fdba74; color: #7c2d12; }
+    .theme-lava .sq-dark { background-color: #c2410c; color: #ffedd5; }
+
+    .theme-royal .sq-light { background-color: #ddd6fe; color: #4c1d95; }
+    .theme-royal .sq-dark { background-color: #6d28d9; color: #f5f3ff; }
+
+    .theme-coffee .sq-light { background-color: #e7d8c9; color: #432818; }
+    .theme-coffee .sq-dark { background-color: #895737; color: #f0e6df; }
+
+    .sq-selected {
+      background-color: #818cf8 !important;
+      color: #ffffff !important;
+    }
+    .sq-highlight::after {
+      content: '';
+      position: absolute;
+      width: 28%;
+      height: 28%;
+      background-color: rgba(99, 102, 241, 0.6);
+      border-radius: 50%;
+    }
+
+    .chess-piece {
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.15s ease, filter 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .chess-piece:hover {
+      transform: scale(1.12);
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+    }
+
+    .blindfold-active .chess-piece {
+      opacity: 0 !important;
+    }
+
+    .glow-gold {
+      box-shadow: 0 0 20px rgba(245, 158, 11, 0.35);
+    }
+  </style>
+</head>
+<body class="h-full text-slate-100 flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950">
+
+  <!-- HEADER BANNER -->
+  <header class="bg-slate-900/90 border-b border-slate-800 backdrop-blur sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+      
+      <!-- Logo & Attribution -->
+      <div class="flex items-center space-x-3">
+        <div class="bg-gradient-to-tr from-amber-500 via-orange-500 to-indigo-600 p-3 rounded-2xl shadow-lg glow-gold">
+          <i class="fa-solid fa-chess-knight text-2xl text-slate-950 font-black"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-2xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-amber-400 via-orange-300 to-indigo-400">
+              ChessMind
+            </h1>
+            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-950 text-indigo-300 border border-indigo-800/80">
+              v3.5 Pro
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 font-medium">
+            Creado por: <span class="text-amber-400 font-bold underline decoration-amber-500/50">Juan Rodriguero (11 años)</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Record Badge -->
+      <div class="bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-indigo-500/15 border border-amber-500/40 rounded-2xl px-4 py-2 flex items-center gap-3.5 shadow-md">
+        <div class="bg-gradient-to-tr from-amber-500 to-amber-400 p-2 rounded-xl text-slate-950 font-black shadow">
+          <i class="fa-solid fa-trophy text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-black text-amber-300 tracking-wide uppercase">¡Récord Creador Joven!</span>
+            <i class="fa-solid fa-circle-check text-amber-400 text-xs"></i>
+          </div>
+          <p class="text-xs text-slate-300">
+            Aplicación desarrollada íntegramente por <span class="font-bold text-white bg-amber-500/20 px-1.5 py-0.5 rounded border border-amber-500/30">Juan Rodriguero</span> (11 años).
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto w-full px-4 py-5 flex-1 flex flex-col gap-5">
+    
+    <!-- NAVIGATION TABS -->
+    <nav class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800 scrollbar-none" id="main-tabs">
+      <button onclick="switchTab('sim')" id="tab-sim" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-indigo-600 text-white shadow-lg transition-all whitespace-nowrap">
+        <i class="fa-solid fa-robot"></i> 1. Simulador GM
+      </button>
+      <button onclick="switchTab('zero')" id="tab-zero" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700 transition-all whitespace-nowrap">
+        <i class="fa-solid fa-graduation-cap text-emerald-400"></i> 2. Aprender desde Cero
+      </button>
+      <button onclick="switchTab('ladder')" id="tab-ladder" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700 transition-all whitespace-nowrap">
+        <i class="fa-solid fa-stairs text-amber-400"></i> 3. Escalera de Mates (1 a 10)
+      </button>
+      <button onclick="switchTab('style')" id="tab-style" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700 transition-all whitespace-nowrap">
+        <i class="fa-solid fa-user-ninja text-purple-400"></i> 4. Test de Estilo (5 Preguntas - 25+ GMs)
+      </button>
+      <button onclick="switchTab('puzzle')" id="tab-puzzle" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700 transition-all whitespace-nowrap">
+        <i class="fa-solid fa-puzzle-piece text-cyan-400"></i> 5. Puzzles Tácticos
+      </button>
+      <button onclick="switchTab('blind')" id="tab-blind" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700 transition-all whitespace-nowrap">
+        <i class="fa-solid fa-eye-slash text-rose-400"></i> 6. Modo Ciego
+      </button>
+      <button onclick="switchTab('endgame')" id="tab-endgame" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700 transition-all whitespace-nowrap">
+        <i class="fa-solid fa-hourglass-end text-orange-400"></i> 7. Finales & Blitz
+      </button>
+      <button onclick="switchTab('editor')" id="tab-editor" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700 transition-all whitespace-nowrap">
+        <i class="fa-solid fa-sliders text-teal-400"></i> 8. Editor
+      </button>
+      <button onclick="switchTab('feedback')" id="tab-feedback" class="tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700 transition-all whitespace-nowrap">
+        <i class="fa-solid fa-comment-dots text-pink-400"></i> 9. Sugerencias o Errores
+      </button>
+    </nav>
+
+    <!-- INTERACTIVE GAME AREA -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- LEFT COLUMN: CHESSBOARD -->
+      <div class="lg:col-span-6 xl:col-span-5 flex flex-col items-center gap-4 bg-slate-900/60 p-4 rounded-3xl border border-slate-800/80 shadow-2xl">
+        
+        <!-- Status Bar Above Board -->
+        <div class="w-full flex justify-between items-center px-3 py-2 bg-slate-950/80 rounded-xl border border-slate-800 text-xs gap-2 flex-wrap sm:flex-nowrap">
+          <div class="flex items-center gap-2" id="turn-indicator">
+            <span class="w-3.5 h-3.5 rounded-full bg-white inline-block border border-slate-400 shadow"></span>
+            <span class="font-bold text-slate-200">Turno: Blancas</span>
+          </div>
+          
+          <!-- Board Theme & Piece Style Pickers -->
+          <div class="flex items-center gap-2.5">
+            <!-- Theme Picker -->
+            <div class="flex items-center gap-1.5">
+              <i class="fa-solid fa-palette text-amber-400 text-xs" title="Tema del Tablero"></i>
+              <select id="board-theme-select" onchange="changeBoardTheme(this.value)" class="bg-slate-900 border border-slate-700 text-[11px] rounded-lg p-1 text-slate-200 focus:outline-none font-semibold cursor-pointer">
+                <option value="wood">Madera Clásica</option>
+                <option value="emerald">Esmeralda Pro</option>
+                <option value="cyberpunk">Cyberpunk Neon</option>
+                <option value="ocean">Azul Océano</option>
+                <option value="midnight">Medianoche</option>
+                <option value="gold">Oro Real</option>
+                <option value="rose">Rosa Cuarzo</option>
+                <option value="monochrome">Monocromático</option>
+                <option value="neon">Verde Neón</option>
+                <option value="sunset">Atardecer Caluroso</option>
+                <option value="amethyst">Amatista Mística</option>
+                <option value="ruby">Rubí Intenso</option>
+                <option value="forest">Bosque Vivo</option>
+                <option value="slate">Pizarra Industrial</option>
+                <option value="coral">Coral Solar</option>
+                <option value="amber">Ámbar Cálido</option>
+                <option value="ice">Hielo Polar</option>
+                <option value="lava">Lava Volcánica</option>
+                <option value="royal">Púrpura Real</option>
+                <option value="coffee">Café Artesanal</option>
+              </select>
+            </div>
+
+            <!-- Piece Style Picker -->
+            <div class="flex items-center gap-1.5">
+              <i class="fa-solid fa-chess text-indigo-400 text-xs" title="Modelo de Piezas"></i>
+              <select id="piece-style-select" onchange="changePieceStyle(this.value)" class="bg-slate-900 border border-slate-700 text-[11px] rounded-lg p-1 text-slate-200 focus:outline-none font-semibold cursor-pointer">
+                <option value="unicode">Piezas Clásicas</option>
+                <option value="fontawesome">Vectores Pro</option>
+                <option value="neon">Neón Cyber</option>
+                <option value="emoji">Emoji Fantasía</option>
+                <option value="retro">Pixel Retro</option>
+              </select>
+            </div>
+
+            <!-- App Background Color Picker -->
+            <div class="flex items-center gap-1.5">
+              <i class="fa-solid fa-fill-drip text-emerald-400 text-xs" title="Fondo de la App"></i>
+              <select id="app-bg-select" onchange="changeAppBackground(this.value)" class="bg-slate-900 border border-slate-700 text-[11px] rounded-lg p-1 text-slate-200 focus:outline-none font-semibold cursor-pointer">
+                <option value="#020617">Slate Oscuro</option>
+                <option value="#000000">Negro Puro</option>
+                <option value="#0f172a">Azul Noche</option>
+                <option value="#18181b">Gris Zinc</option>
+                <option value="#1e1b4b">Púrpura Profundo</option>
+                <option value="#064e3b">Verde Esmeralda</option>
+                <option value="#450a0a">Rojo Granate</option>
+                <option value="#134e4a">Verde Teal</option>
+                <option value="#312e81">Índigo Místico</option>
+                <option value="#f8fafc">Blanco Claro</option>
+                <option value="custom">Personalizado 🎨</option>
+              </select>
+              <input type="color" id="app-bg-picker" value="#020617" oninput="changeAppCustomBg(this.value)" class="w-6 h-6 rounded-md cursor-pointer border border-slate-700 p-0 bg-transparent hidden" title="Elegir color en la paleta">
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Board Wrapper -->
+        <div class="w-full max-w-[440px] aspect-square relative select-none">
+          <div id="chessboard" class="theme-wood w-full h-full grid grid-cols-8 grid-rows-8 border-4 border-slate-800 rounded-2xl overflow-hidden shadow-2xl bg-slate-950">
+            <!-- Squares rendered by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Board Control Buttons -->
+        <div class="w-full flex justify-between gap-2">
+          <button onclick="resetBoardMode()" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-2 border border-slate-700/50">
+            <i class="fa-solid fa-rotate-left text-amber-400"></i> Reiniciar
+          </button>
+          <button onclick="flipBoard()" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 rounded-xl font-semibold text-xs transition flex items-center justify-center gap-2 border border-slate-700/50">
+            <i class="fa-solid fa-arrows-rotate text-indigo-400"></i> Voltear
+          </button>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: DYNAMIC CONTROL PANELS & TUTOR CONSOLE -->
+      <div class="lg:col-span-6 xl:col-span-7 space-y-4">
+        
+        <!-- DYNAMIC PANEL CONTAINER -->
+        <div class="bg-slate-900/70 border border-slate-800 rounded-3xl p-5 shadow-2xl backdrop-blur">
+          
+          <!-- MODE 1: GM SIMULATOR -->
+          <div id="panel-sim" class="mode-panel space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h2 class="text-lg font-black text-amber-400 flex items-center gap-2">
+                <i class="fa-solid fa-chess-king"></i> Simulador de Estilos de Leyendas
+              </h2>
+              <span class="text-xs bg-amber-500/20 text-amber-300 font-bold px-2.5 py-1 rounded-lg border border-amber-500/30">IA Táctica</span>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Elige tu Oponente GM</label>
+                <select id="sim-gm-select" onchange="initSimGame()" class="w-full bg-slate-950 border border-slate-800 text-sm rounded-xl p-3 text-white focus:outline-none focus:border-indigo-500 font-medium">
+                  <option value="kasparov">Garry Kasparov (Ataque y Sacrificio)</option>
+                  <option value="karpov">Anatoly Karpov (Asfixia Posicional)</option>
+                  <option value="carlsen">Magnus Carlsen (Precisión Quirúrgica)</option>
+                  <option value="tal">Mikhail Tal (Caos Táctico)</option>
+                  <option value="fischer">Bobby Fischer (Perfección y Voluntad)</option>
+                  <option value="morphy">Paul Morphy (Desarrollo Veloz)</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Tus Piezas</label>
+                <select id="sim-color-select" onchange="initSimGame()" class="w-full bg-slate-950 border border-slate-800 text-sm rounded-xl p-3 text-white focus:outline-none focus:border-indigo-500 font-medium">
+                  <option value="white">Blancas (Juegas primero)</option>
+                  <option value="black">Negras (El GM empieza)</option>
+                </select>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 leading-relaxed bg-slate-950/50 p-3 rounded-xl border border-slate-800/80">
+              Cada Leyenda responderá a tus jugadas con su estilo auténtico y te explicará sus pensamientos estratégicos en el panel inferior.
+            </p>
+          </div>
+
+          <!-- MODE 2: LEARN FROM ZERO (CURSO DESDE CERO) -->
+          <div id="panel-zero" class="mode-panel space-y-4 hidden">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h2 class="text-lg font-black text-emerald-400 flex items-center gap-2">
+                <i class="fa-solid fa-graduation-cap"></i> Curso de Ajedrez desde Cero
+              </h2>
+              <span id="zero-step-badge" class="text-xs bg-emerald-500/20 text-emerald-300 font-bold px-2.5 py-1 rounded-lg border border-emerald-500/30">
+                Lección 1 / 6
+              </span>
+            </div>
+
+            <div id="zero-content" class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 space-y-3">
+              <!-- Content inserted by JS -->
+            </div>
+
+            <div class="flex gap-3">
+              <button onclick="navZeroLesson(-1)" id="zero-prev-btn" class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold text-xs sm:text-sm text-slate-300 transition">
+                <i class="fa-solid fa-chevron-left"></i> Anterior
+              </button>
+              <button onclick="navZeroLesson(1)" id="zero-next-btn" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-xs sm:text-sm transition shadow-lg">
+                Siguiente Lección <i class="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- MODE 3: CHECKMATE LADDER (MATE EN 1 A MATE EN 10) -->
+          <div id="panel-ladder" class="mode-panel space-y-4 hidden">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h2 class="text-lg font-black text-amber-400 flex items-center gap-2">
+                <i class="fa-solid fa-stairs"></i> Escalera de Mates Tácticos (1 a 10)
+              </h2>
+              <span id="ladder-level-badge" class="text-xs bg-amber-500/20 text-amber-300 font-bold px-3 py-1 rounded-lg border border-amber-500/30">
+                Nivel 1: Mate en 1
+              </span>
+            </div>
+
+            <div class="flex items-center justify-between bg-slate-950/70 p-3 rounded-2xl border border-slate-800">
+              <div>
+                <p id="ladder-desc" class="text-xs font-bold text-slate-200">Encuentra la secuencia exacta para dar jaque mate.</p>
+                <p id="ladder-status" class="text-[11px] text-amber-400 font-semibold">Toca las piezas para intentar dar el jaque mate perfecto.</p>
+              </div>
+              <div class="flex gap-2">
+                <button onclick="selectLadderLevel(currentLadderLevel)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-bold border border-slate-700 transition">
+                  <i class="fa-solid fa-rotate-left"></i> Reiniciar Posición
+                </button>
+                <button onclick="getLadderHint()" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg text-xs font-bold border border-amber-500/40 transition">
+                  <i class="fa-solid fa-lightbulb"></i> Pista
+                </button>
+              </div>
+            </div>
+
+            <!-- Level Selector Grid -->
+            <div class="grid grid-cols-5 sm:grid-cols-10 gap-1.5" id="ladder-steps-container">
+              <!-- Level buttons generated dynamically -->
+            </div>
+          </div>
+
+          <!-- MODE 4: STYLE TEST (5 PREGUNTAS - 25+ GMs) -->
+          <div id="panel-style" class="mode-panel space-y-4 hidden">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h2 class="text-lg font-black text-purple-400 flex items-center gap-2">
+                <i class="fa-solid fa-user-ninja"></i> Test de Estilo: 5 Preguntas (25+ GMs)
+              </h2>
+              <span class="text-xs bg-purple-500/20 text-purple-300 font-bold px-2.5 py-1 rounded-lg border border-purple-500/30">25+ Leyendas</span>
+            </div>
+
+            <div id="style-quiz-body" class="space-y-3">
+              <!-- Quiz rendered dynamically by JS -->
+            </div>
+          </div>
+
+          <!-- MODE 5: TACTICAL PUZZLES -->
+          <div id="panel-puzzle" class="mode-panel space-y-4 hidden">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h2 class="text-lg font-black text-cyan-400 flex items-center gap-2">
+                <i class="fa-solid fa-puzzle-piece"></i> Desafíos de Puzzle Maestro
+              </h2>
+              <span id="puzzle-score-badge" class="text-xs bg-cyan-500/20 text-cyan-300 font-bold px-3 py-1 rounded-lg border border-cyan-500/30">
+                Puntos: 0
+              </span>
+            </div>
+            <p id="puzzle-prompt" class="text-xs text-slate-300 bg-slate-950 p-3 rounded-xl border border-slate-800">
+              Encuentra la mejor jugada para ganar ventaja decisiva o dar mate.
+            </p>
+            <button onclick="loadNextPuzzle()" class="w-full py-2.5 bg-cyan-600 hover:bg-cyan-500 font-bold rounded-xl text-xs sm:text-sm text-white shadow-lg transition">
+              Siguiente Acertijo <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+
+          <!-- MODE 6: BLINDFOLD CHESS -->
+          <div id="panel-blind" class="mode-panel space-y-4 hidden">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h2 class="text-lg font-black text-rose-400 flex items-center gap-2">
+                <i class="fa-solid fa-eye-slash"></i> Entrenamiento de Memoria Ciega
+              </h2>
+              <span class="text-xs bg-rose-500/20 text-rose-300 font-bold px-2.5 py-1 rounded-lg border border-rose-500/30">Visualización</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              Las piezas se volverán invisibles una vez que realices tu primer movimiento. ¡Mapea las casillas en tu cabeza y demuestra tu cálculo mental!
+            </p>
+            <div class="flex items-center gap-3 bg-slate-950 p-3 rounded-xl border border-slate-800">
+              <input type="checkbox" id="toggle-blindfold-cb" onchange="toggleBlindfoldManual()" class="w-4 h-4 accent-indigo-600 rounded cursor-pointer">
+              <label for="toggle-blindfold-cb" class="text-xs font-semibold text-slate-200 cursor-pointer">Ocultar/Mostrar piezas manualmente</label>
+            </div>
+          </div>
+
+          <!-- MODE 7: ENDGAME SURVIVAL & BLITZ -->
+          <div id="panel-endgame" class="mode-panel space-y-4 hidden">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h2 class="text-lg font-black text-orange-400 flex items-center gap-2">
+                <i class="fa-solid fa-stopwatch"></i> Finales & Blitz Extremo
+              </h2>
+              <div id="blitz-timer-display" class="text-2xl font-black text-red-500 font-mono">30s</div>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button onclick="startEndgameScenario('kp')" class="p-3 bg-slate-950 hover:bg-slate-800 rounded-xl border border-slate-800 text-left transition">
+                <p class="text-xs font-bold text-amber-400">Rey y Peón vs Rey</p>
+                <p class="text-[11px] text-slate-400">Domina la regla de la oposición.</p>
+              </button>
+              <button onclick="startEndgameScenario('rook')" class="p-3 bg-slate-950 hover:bg-slate-800 rounded-xl border border-slate-800 text-left transition">
+                <p class="text-xs font-bold text-indigo-400">Final de Torre Lucena</p>
+                <p class="text-[11px] text-slate-400">Construye el puente para ganar.</p>
+              </button>
+            </div>
+            <button onclick="startBlitzChallenge()" class="w-full py-3 bg-red-600 hover:bg-red-500 font-bold rounded-xl text-xs sm:text-sm text-white shadow-lg transition flex items-center justify-center gap-2">
+              <i class="fa-solid fa-bolt"></i> Iniciar Desafío Blitz (30 segundos)
+            </button>
+          </div>
+
+          <!-- MODE 8: POSITION EDITOR -->
+          <div id="panel-editor" class="mode-panel space-y-4 hidden">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h2 class="text-lg font-black text-teal-400 flex items-center gap-2">
+                <i class="fa-solid fa-sliders"></i> Creador y Editor de Posiciones
+              </h2>
+              <span class="text-xs bg-teal-500/20 text-teal-300 font-bold px-2.5 py-1 rounded-lg border border-teal-500/30">Personalizado</span>
+            </div>
+            <p class="text-xs text-slate-300">Selecciona una pieza y toca sobre el tablero para colocarla o vaciar casillas:</p>
+            <div class="flex flex-wrap gap-2 justify-center bg-slate-950 p-3 rounded-xl border border-slate-800" id="editor-palette">
+              <!-- Pieces palette rendered by JS -->
+            </div>
+            <button onclick="clearEditorBoard()" class="w-full py-2 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-xl text-slate-300">
+              Vaciar Tablero
+            </button>
+          </div>
+
+          <!-- MODE 9: SUGGESTIONS & BUG REPORTS -->
+          <div id="panel-feedback" class="mode-panel space-y-4 hidden">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+              <h2 class="text-lg font-black text-pink-400 flex items-center gap-2">
+                <i class="fa-solid fa-comment-dots"></i> Sugerencias o Reporte de Errores
+              </h2>
+              <span class="text-xs bg-pink-500/20 text-pink-300 font-bold px-2.5 py-1 rounded-lg border border-pink-500/30">Buzón Directo</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              ¿Tienes una idea para mejorar <b>ChessMind</b> o encontraste algún error en la aplicación? Déjanos tu mensaje a continuación para seguir mejorando.
+            </p>
+            <form onsubmit="submitFeedback(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Tipo de Mensaje</label>
+                <select id="feedback-type" class="w-full bg-slate-950 border border-slate-800 text-xs rounded-xl p-2.5 text-slate-200 focus:outline-none focus:border-pink-500">
+                  <option value="sugerencia">💡 Sugerencia o Idea Nueva</option>
+                  <option value="error">🐛 Reporte de Error / Bug</option>
+                  <option value="felicitacion">⭐ Felicitación para Juan</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Tu Nombre / Usuario (Opcional)</label>
+                <input type="text" id="feedback-author" placeholder="Ej. Carlos o Jugador123" class="w-full bg-slate-950 border border-slate-800 text-xs rounded-xl p-2.5 text-slate-200 focus:outline-none focus:border-pink-500">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Detalle de tu mensaje</label>
+                <textarea id="feedback-msg" rows="3" required placeholder="Cuéntanos qué te gustaría agregar o qué problema tuviste..." class="w-full bg-slate-950 border border-slate-800 text-xs rounded-xl p-2.5 text-slate-200 focus:outline-none focus:border-pink-500 resize-none"></textarea>
+              </div>
+              <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-500 hover:to-rose-500 font-bold rounded-xl text-xs sm:text-sm text-white shadow-lg transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-paper-plane"></i> Enviar Mensaje
+              </button>
+            </form>
+            <div id="feedback-sent-msg" class="hidden p-3 bg-emerald-950/60 border border-emerald-800 rounded-xl text-xs text-emerald-300 font-semibold text-center">
+              <i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i> ¡Gracias por tu aporte! Tu mensaje ha sido recibido con éxito.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- TUTOR & REAL-TIME COACH CONSOLE -->
+        <div class="bg-slate-900/70 border border-slate-800 rounded-3xl p-4 flex flex-col h-[280px] shadow-2xl backdrop-blur">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800">
+            <span class="text-xs font-extrabold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
+              <i class="fa-solid fa-chalkboard-user"></i> Tutor y Análisis ChessMind
+            </span>
+            <span class="text-[10px] text-slate-400 bg-slate-950 px-2 py-0.5 rounded-full border border-slate-800">Feedback en vivo</span>
+          </div>
+
+          <!-- Messages scroll container -->
+          <div id="chat-box" class="flex-1 overflow-y-auto space-y-2.5 pr-1 text-xs">
+            <!-- Dynamic logs inserted here -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-950 border-t border-slate-800/80 mt-6 py-4 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+      <p>© ChessMind — Creado y Programado por <span class="text-slate-300 font-bold">Juan Rodriguero</span> (11 años)</p>
+      <p class="text-[11px] text-slate-600">Simulador, Academia y Motor Táctico Unificado v3.5 Pro</p>
+    </div>
+  </footer>
+
+  <script>
+    // PIECE STYLES & DICTIONARIES
+    let currentPieceStyle = 'unicode';
+
+    const UNICODE_PIECES = {
+      'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟',
+      'R': '♖', 'N': '♘', 'B': '♗', 'Q': '♕', 'K': '♔', 'P': '♙', '': ''
+    };
+
+    const EMOJI_PIECES = {
+      'r': '🏰', 'n': '🦄', 'b': '🧙‍♂️', 'q': '👸', 'k': '🤴', 'p': '🛡️',
+      'R': '🏰', 'N': '🦄', 'B': '🧙‍♂️', 'Q': '👸', 'K': '🤴', 'P': '🛡️', '': ''
+    };
+
+    const FA_PIECE_MAP = {
+      'r': 'fa-chess-rook', 'n': 'fa-chess-knight', 'b': 'fa-chess-bishop',
+      'q': 'fa-chess-queen', 'k': 'fa-chess-king', 'p': 'fa-chess-pawn',
+      'R': 'fa-chess-rook', 'N': 'fa-chess-knight', 'B': 'fa-chess-bishop',
+      'Q': 'fa-chess-queen', 'K': 'fa-chess-king', 'P': 'fa-chess-pawn'
+    };
+
+    function getPieceHTML(p) {
+      if (!p) return '';
+      const isWhite = p === p.toUpperCase();
+
+      if (currentPieceStyle === 'fontawesome') {
+        const iconClass = FA_PIECE_MAP[p];
+        const colorClass = isWhite 
+          ? 'text-amber-100 drop-shadow-[0_2px_3px_rgba(0,0,0,0.9)]' 
+          : 'text-slate-950 drop-shadow-[0_1px_1px_rgba(255,255,255,0.4)]';
+        return `<i class="fa-solid ${iconClass} ${colorClass}"></i>`;
+      }
+
+      if (currentPieceStyle === 'neon') {
+        const iconClass = FA_PIECE_MAP[p];
+        const colorClass = isWhite 
+          ? 'text-cyan-300 drop-shadow-[0_0_8px_rgba(6,182,212,0.9)]' 
+          : 'text-fuchsia-400 drop-shadow-[0_0_8px_rgba(232,121,249,0.9)]';
+        return `<i class="fa-solid ${iconClass} ${colorClass}"></i>`;
+      }
+
+      if (currentPieceStyle === 'emoji') {
+        return `<span class="${isWhite ? 'filter drop-shadow' : 'brightness-75'}">${EMOJI_PIECES[p]}</span>`;
+      }
+
+      if (currentPieceStyle === 'retro') {
+        const char = UNICODE_PIECES[p];
+        const colorClass = isWhite ? 'text-yellow-300 font-mono tracking-widest' : 'text-emerald-400 font-mono tracking-widest';
+        return `<span class="${colorClass}">${char}</span>`;
+      }
+
+      // Default: Unicode
+      return UNICODE_PIECES[p];
+    }
+
+    function changePieceStyle(style) {
+      currentPieceStyle = style;
+      renderBoard();
+      if (currentTab === 'editor') renderEditorPalette();
+      addLog('Estilo', `Modelo de piezas actualizado a: <b>${style.toUpperCase()}</b>`, 'system');
+    }
+
+    function changeAppBackground(val) {
+      const picker = document.getElementById('app-bg-picker');
+      if (val === 'custom') {
+        picker.classList.remove('hidden');
+        picker.click();
+        applyBgColor(picker.value);
+      } else {
+        picker.classList.add('hidden');
+        picker.value = val;
+        applyBgColor(val);
+      }
+    }
+
+    function changeAppCustomBg(hexColor) {
+      applyBgColor(hexColor);
+    }
+
+    function applyBgColor(colorHex) {
+      document.body.style.backgroundColor = colorHex;
+      
+      // Ajusta dinámicamente la legibilidad si se elige un color muy claro
+      if (isLightColor(colorHex)) {
+        document.body.classList.remove('text-slate-100');
+        document.body.classList.add('text-slate-900');
+      } else {
+        document.body.classList.remove('text-slate-900');
+        document.body.classList.add('text-slate-100');
+      }
+      
+      addLog('Fondo', `Fondo de la app cambiado a: <span class="font-bold uppercase">${colorHex}</span>`, 'system');
+    }
+
+    function isLightColor(color) {
+      if (!color || color.charAt(0) !== '#') return false;
+      let hex = color.substring(1);
+      if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+      const num = parseInt(hex, 16);
+      if (isNaN(num)) return false;
+      const r = (num >> 16) & 255;
+      const g = (num >> 8) & 255;
+      const b = num & 255;
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      return brightness > 150;
+    }
+
+    const INITIAL_BOARD = [
+      ['r','n','b','q','k','b','n','r'],
+      ['p','p','p','p','p','p','p','p'],
+      ['','','','','','','',''],
+      ['','','','','','','',''],
+      ['','','','','','','',''],
+      ['','','','','','','',''],
+      ['P','P','P','P','P','P','P','P'],
+      ['R','N','B','Q','K','B','N','R']
+    ];
+
+    // STATE VARIABLES
+    let board = JSON.parse(JSON.stringify(INITIAL_BOARD));
+    let selectedSquare = null;
+    let turn = 'white';
+    let currentTab = 'sim';
+    let isFlipped = false;
+    let blindfoldActive = false;
+    let puzzleScore = 0;
+    let blitzTimer = null;
+    let blitzSeconds = 30;
+    let editorSelectedPiece = 'P';
+    let quizAnswers = [];
+
+    // -------------------------------------------------------------
+    // LESSONS DATA (CURSO DESDE CERO COMPLETO)
+    // -------------------------------------------------------------
+    const ZERO_LESSONS = [
+      {
+        title: "1. El Tablero y las Piezas",
+        badge: "Lección 1 / 6",
+        html: `
+          <p class="text-xs text-slate-200 leading-relaxed">
+            El tablero de ajedrez tiene <b>64 casillas</b> (32 claras y 32 oscuras). La casilla de la esquina inferior derecha siempre debe ser blanca ("Blanca a la derecha").
+          </p>
+          <div class="bg-slate-900 p-3 rounded-xl border border-slate-800 text-xs text-amber-300 font-semibold">
+            <b>Ejército:</b> Cada jugador comienza con 16 piezas: 8 Peones, 2 Torres, 2 Caballos, 2 Alfiles, 1 Dama y 1 Rey.
+          </div>
+        `
+      },
+      {
+        title: "2. El Peón y sus Secretos",
+        badge: "Lección 2 / 6",
+        html: `
+          <p class="text-xs text-slate-200 leading-relaxed">
+            El <b>Peón (♟)</b> avanza 1 casilla hacia adelante. ¡Solo en su primer movimiento puede avanzar 2 casillas!
+          </p>
+          <ul class="list-disc list-inside text-xs text-slate-300 space-y-1">
+            <li><b>Captura:</b> El peón captura en diagonal, 1 casilla hacia adelante.</li>
+            <li><b>Coronación:</b> Si un peón llega al final del tablero, ¡se transforma en Dama, Torre, Alfil o Caballo!</li>
+          </ul>
+        `
+      },
+      {
+        title: "3. La Torre y el Alfil",
+        badge: "Lección 3 / 6",
+        html: `
+          <p class="text-xs text-slate-200 leading-relaxed">
+            <b>Torre (♜):</b> Se mueve en líneas rectas (filas y columnas) todas las casillas que quiera.<br>
+            <b>Alfil (♝):</b> Se mueve en diagonal todas las casillas que quiera. Un alfil nunca cambia el color de su casilla.
+          </p>
+        `
+      },
+      {
+        title: "4. El Caballo y la Dama",
+        badge: "Lección 4 / 6",
+        html: `
+          <p class="text-xs text-slate-200 leading-relaxed">
+            <b>Caballo (♞):</b> Se mueve en forma de "L" (2 casillas en una dirección y 1 al costado). ¡Es la única pieza que puede saltar sobre otras!<br>
+            <b>Dama (♛):</b> La pieza más poderosa. Combina los movimientos de la Torre y el Alfil.
+          </p>
+        `
+      },
+      {
+        title: "5. El Rey, Jaque y Jaque Mate",
+        badge: "Lección 5 / 6",
+        html: `
+          <p class="text-xs text-slate-200 leading-relaxed">
+            El <b>Rey (♚)</b> avanza 1 casilla en cualquier dirección. Nunca puede moverse a una casilla atacada.
+          </p>
+          <div class="bg-indigo-950/60 p-3 rounded-xl border border-indigo-800/60 text-xs text-indigo-200">
+            <b>Jaque:</b> Cuando amenazan al Rey.<br>
+            <b>Jaque Mate:</b> Cuando el Rey está amenazado y no tiene ninguna forma legal de escapar. ¡Fin de la partida!
+          </div>
+        `
+      },
+      {
+        title: "6. Reglas Especiales: El Enroque",
+        badge: "Lección 6 / 6",
+        html: `
+          <p class="text-xs text-slate-200 leading-relaxed">
+            El <b>Enroque</b> permite proteger al Rey y activar la Torre en una sola jugada. El Rey avanza 2 casillas hacia la Torre y la Torre salta al lado opuesto del Rey.
+          </p>
+        `
+      }
+    ];
+    let zeroStep = 0;
+
+    // -------------------------------------------------------------
+    // CHECKMATE LADDER DATA (MATE EN 1 A MATE EN 10 - PARTIDAS INTERACTIVAS)
+    // -------------------------------------------------------------
+    const LADDER_DATA = [
+      {
+        level: 1,
+        title: "Mate en 1: Ataque a f7",
+        hint: "Mueve la Dama de f3 (casilla f3) a f7 para dar jaque mate inmediato.",
+        setup: "r1bqkb1r/pppp1ppp/2n5/4p3/2B1n3/5Q2/PPPP1PPP/RNB1K1NR w",
+        solution: [{ from: [5, 5], to: [1, 5] }]
+      },
+      {
+        level: 2,
+        title: "Mate en 2: Desviación de la Torre",
+        hint: "Sacrifica la Dama en b8 para desviar la Torre y rematar con tu Torre en d8.",
+        setup: "5rk1/5ppp/8/8/8/8/1Q3PPP/3R2K1 w",
+        solution: [
+          { from: [6, 1], to: [0, 1] },
+          { auto: { from: [0, 5], to: [0, 1] } },
+          { from: [7, 3], to: [0, 3] }
+        ]
+      },
+      {
+        level: 3,
+        title: "Mate en 2: Remate de la Torre en a8",
+        hint: "Juega la Dama a b8 para desviar la Torre de f8 y dar mate con tu Torre de a1.",
+        setup: "r1b2rk1/pppp1ppp/8/8/8/8/1Q3PPP/R5K1 w",
+        solution: [
+          { from: [6, 1], to: [0, 1] },
+          { auto: { from: [0, 5], to: [0, 1] } },
+          { from: [7, 0], to: [0, 0] }
+        ]
+      },
+      {
+        level: 4,
+        title: "Mate en 2: Sacrificio en g7",
+        hint: "Entrega la Dama en g7 y entra con tu Caballo en h7.",
+        setup: "6kr/5p1p/5N2/8/8/8/1Q6/6K1 w",
+        solution: [
+          { from: [6, 1], to: [1, 6] },
+          { auto: { from: [0, 7], to: [1, 6] } },
+          { from: [2, 5], to: [1, 7] }
+        ]
+      },
+      {
+        level: 5,
+        title: "Mate en 2: Avance del Peón de Mate",
+        hint: "Jaquéalo con la Dama en g7 y retoma con el Peón para acorralarlo.",
+        setup: "r5rk/5p1p/5P2/8/8/8/1Q6/6K1 w",
+        solution: [
+          { from: [6, 1], to: [1, 6] },
+          { auto: { from: [0, 6], to: [1, 6] } },
+          { from: [2, 5], to: [1, 6] }
+        ]
+      },
+      {
+        level: 6,
+        title: "Mate en 2: Pasillo con Doble Torre",
+        hint: "Lanza tu Torre de b2 a b8 y entra con la otra en d8.",
+        setup: "5rk1/5ppp/8/8/8/8/1R3PPP/3R2K1 w",
+        solution: [
+          { from: [6, 1], to: [0, 1] },
+          { auto: { from: [0, 5], to: [0, 1] } },
+          { from: [7, 3], to: [0, 3] }
+        ]
+      },
+      {
+        level: 7,
+        title: "Mate en 2: Invasión de Dama en f7",
+        hint: "Lleva la Dama a f7 presionando al Rey antes del mate final.",
+        setup: "r5rk/5p1p/5N2/8/8/8/5Q2/6K1 w",
+        solution: [
+          { from: [6, 5], to: [1, 5] },
+          { auto: { from: [0, 6], to: [1, 6] } },
+          { from: [1, 5], to: [1, 6] }
+        ]
+      },
+      {
+        level: 8,
+        title: "Mate en 3: Cascada en la Octava Fila",
+        hint: "Sacrifica en b8 con Dama, luego con la primera Torre y corona el mate con la segunda Torre.",
+        setup: "r4r1k/5p1p/8/8/8/8/1Q3PPP/1R1R2K1 w",
+        solution: [
+          { from: [6, 1], to: [0, 1] },
+          { auto: { from: [0, 0], to: [0, 1] } },
+          { from: [7, 1], to: [0, 1] },
+          { auto: { from: [0, 5], to: [0, 1] } },
+          { from: [7, 3], to: [0, 3] }
+        ]
+      },
+      {
+        level: 9,
+        title: "Mate en 3: Asfixia Estratégica",
+        hint: "Rrompe en b8 con Dama, simplifica las torres y culmina la invasión.",
+        setup: "r4r1k/6pp/5p2/8/8/8/1Q3PPP/1R1R2K1 w",
+        solution: [
+          { from: [6, 1], to: [0, 1] },
+          { auto: { from: [0, 0], to: [0, 1] } },
+          { from: [7, 1], to: [0, 1] },
+          { auto: { from: [0, 5], to: [0, 1] } },
+          { from: [7, 3], to: [0, 3] }
+        ]
+      },
+      {
+        level: 10,
+        title: "Mate en 3: El Gran Final de los Maestros",
+        hint: "Ejecuta el triple sacrificio de la fila posterior para dar el mate supremo.",
+        setup: "r4r1k/6pp/5p2/8/8/8/1Q3PPP/1R1R2K1 w",
+        solution: [
+          { from: [6, 1], to: [0, 1] },
+          { auto: { from: [0, 0], to: [0, 1] } },
+          { from: [7, 1], to: [0, 1] },
+          { auto: { from: [0, 5], to: [0, 1] } },
+          { from: [7, 3], to: [0, 3] }
+        ]
+      }
+    ];
+    let currentLadderLevel = 1;
+    let ladderStepIndex = 0;
+
+    // FEN PARSER HELPER
+    function parseFEN(fen) {
+      const parts = fen.split(' ');
+      const rows = parts[0].split('/');
+      const newBoard = [];
+      for (let r = 0; r < 8; r++) {
+        const row = [];
+        const fenRow = rows[r];
+        for (let i = 0; i < fenRow.length; i++) {
+          const char = fenRow[i];
+          if (!isNaN(char)) {
+            const count = parseInt(char, 10);
+            for (let e = 0; e < count; e++) row.push('');
+          } else {
+            row.push(char);
+          }
+        }
+        newBoard.push(row);
+      }
+      return {
+        board: newBoard,
+        turn: (parts[1] === 'w' || !parts[1]) ? 'white' : 'black'
+      };
+    }
+
+    // STYLE TEST DATA (5 PREGUNTAS DETALLADAS - 25+ GRANDMASTERS)
+    // -------------------------------------------------------------
+    const STYLE_QUESTIONS = [
+      {
+        q: "1. ¿Cuál es tu objetivo prioritario desde la jugada 1?",
+        opts: [
+          { text: "Lanzar un ataque devastador directo al Rey enemigo sin importar el material.", trait: "attacker" },
+          { text: "Acumular ventajas minúsculas, controlar el centro y limitar al rival.", trait: "positional" },
+          { text: "Buscar máxima precisión técnica, adaptarse y dominar el final de partida.", trait: "universal" },
+          { text: "Generar complicaciones tácticas, caos y combinaciones sorpresivas.", trait: "tactician" }
+        ]
+      },
+      {
+        q: "2. Si tu rival te ofrece un sacrificio de peón a cambio de iniciativa, ¿qué decides?",
+        opts: [
+          { text: "Rechazo el sacrificio si debilita mi estructura de peones o mi rey.", trait: "positional" },
+          { text: "Acepto el desafío inmediatamente e intento contraatacar.", trait: "tactician" },
+          { text: "Entrego una pieza propia a cambio de abrir líneas de ataque letales.", trait: "attacker" },
+          { text: "Calculo fríamente las consecuencias concretas antes de decidir.", trait: "universal" }
+        ]
+      },
+      {
+        q: "3. ¿En qué estructura o tipo de posición te sientes más cómodo?",
+        opts: [
+          { text: "Posiciones abiertas con diagonales despejadas para mis alfiles.", trait: "attacker" },
+          { text: "Posiciones cerradas para maniobrar con paciencia con mis caballos.", trait: "positional" },
+          { text: "Cualquier posición donde tenga una pequeña ventaja estratégica.", trait: "universal" },
+          { text: "Posiciones con enroques opuestos y carrera de peones.", trait: "tactician" }
+        ]
+      },
+      {
+        q: "4. ¿Cómo gestionas el tiempo y la toma de decisiones bajo presión?",
+        opts: [
+          { text: "Juego de forma instintiva y veloz buscando la jugada más agresiva.", trait: "attacker" },
+          { text: "Mantenimiento absoluto de la calma buscando la jugada técnicamente perfecta.", trait: "universal" },
+          { text: "Provoco tensiones en el reloj del rival con celadas complejas.", trait: "tactician" },
+          { text: "Prefiero un plan seguro que minimice todo tipo de riesgo.", trait: "positional" }
+        ]
+      },
+      {
+        q: "5. ¿Qué cualidad admiras más en una partida de ajedrez?",
+        opts: [
+          { text: "La belleza artística de una combinación o sacrificio inesperado.", trait: "tactician" },
+          { text: "La fuerza arrolladora de un ataque de mate imparable.", trait: "attacker" },
+          { text: "La elegancia de una victoria impecable sin conceder opciones.", trait: "positional" },
+          { text: "La tenacidad para ganar posiciones aparentemente empatadas.", trait: "universal" }
+        ]
+      }
+    ];
+
+    const GM_DATABASE = {
+      attacker: ["Bobby Fischer", "Garry Kasparov", "Mikhail Tal", "Paul Morphy", "Alexander Alekhine", "Judit Polgár", "Hikaru Nakamura"],
+      positional: ["Anatoly Karpov", "Tigran Petrosian", "José Raúl Capablanca", "Mikhail Botvinnik", "Vasily Smyslov", "Vladimir Kramnik"],
+      universal: ["Magnus Carlsen", "Boris Spassky", "Viswanathan Anand", "Fabiano Caruana", "Ding Liren", "Wesley So"],
+      tactician: ["Max Euwe", "Emanuel Lasker", "Wilhelm Steinitz", "Alireza Firouzja", "Anish Giri", "Levon Aronian"]
+    };
+
+    // -------------------------------------------------------------
+    // BOARD RENDERER & THEME SWITCHER
+    // -------------------------------------------------------------
+    function changeBoardTheme(themeName) {
+      const boardEl = document.getElementById('chessboard');
+      boardEl.className = `theme-${themeName} w-full h-full grid grid-cols-8 grid-rows-8 border-4 border-slate-800 rounded-2xl overflow-hidden shadow-2xl bg-slate-950`;
+      addLog('Estilo', `Tema de tablero actualizado a: <b>${themeName.toUpperCase()}</b>`, 'system');
+    }
+
+    function renderBoard() {
+      const boardEl = document.getElementById('chessboard');
+      boardEl.innerHTML = '';
+
+      if (blindfoldActive) {
+        boardEl.classList.add('blindfold-active');
+      } else {
+        boardEl.classList.remove('blindfold-active');
+      }
+
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const actualR = isFlipped ? 7 - r : r;
+          const actualC = isFlipped ? 7 - c : c;
+          
+          const sq = document.createElement('div');
+          const isLight = (actualR + actualC) % 2 === 0;
+          sq.className = `sq ${isLight ? 'sq-light' : 'sq-dark'} flex items-center justify-center relative font-semibold transition-colors duration-150`;
+          sq.dataset.row = actualR;
+          sq.dataset.col = actualC;
+
+          // Selection styling
+          if (selectedSquare && selectedSquare.r === actualR && selectedSquare.c === actualC) {
+            sq.classList.add('sq-selected');
+          }
+
+          const pieceSymbol = board[actualR][actualC];
+          if (pieceSymbol) {
+            const pieceDiv = document.createElement('div');
+            pieceDiv.className = 'chess-piece text-2xl sm:text-4xl';
+            pieceDiv.innerHTML = getPieceHTML(pieceSymbol);
+            sq.appendChild(pieceDiv);
+          }
+
+          sq.onclick = () => handleSquareClick(actualR, actualC);
+          boardEl.appendChild(sq);
+        }
+      }
+
+      // Update Turn Status
+      document.getElementById('turn-indicator').innerHTML = `
+        <span class="w-3.5 h-3.5 rounded-full ${turn === 'white' ? 'bg-white border border-slate-400' : 'bg-slate-900 border border-slate-600'} inline-block shadow"></span>
+        <span class="font-bold text-slate-200">Turno: ${turn === 'white' ? 'Blancas' : 'Negras'}</span>
+      `;
+    }
+
+    function handleSquareClick(r, c) {
+      if (currentTab === 'editor') {
+        board[r][c] = editorSelectedPiece;
+        renderBoard();
+        return;
+      }
+
+      const clickedPiece = board[r][c];
+
+      if (!selectedSquare) {
+        if (clickedPiece && isMyPiece(clickedPiece)) {
+          selectedSquare = { r, c };
+          renderBoard();
+        }
+      } else {
+        const fromR = selectedSquare.r;
+        const fromC = selectedSquare.c;
+        const piece = board[fromR][fromC];
+
+        // Perform Move
+        board[r][c] = piece;
+        board[fromR][fromC] = '';
+
+        selectedSquare = null;
+        turn = (turn === 'white') ? 'black' : 'white';
+
+        if (currentTab === 'blind') {
+          blindfoldActive = true;
+        }
+
+        renderBoard();
+        addLog('Jugador', `Movimiento a casilla (${8 - r}, ${String.fromCharCode(97 + c)})`, 'user');
+
+        // Check Mode Specific Triggers
+        if (currentTab === 'sim' && turn === 'black') {
+          setTimeout(triggerGMReply, 600);
+        } else if (currentTab === 'ladder') {
+          checkLadderMove(fromR, fromC, r, c);
+        }
+      }
+    }
+
+    function checkLadderMove(fromR, fromC, toR, toC) {
+      const levelData = LADDER_DATA[currentLadderLevel - 1];
+      if (!levelData || !levelData.solution) return;
+
+      const currentStep = levelData.solution[ladderStepIndex];
+      if (!currentStep) return;
+
+      if (currentStep.from[0] === fromR && currentStep.from[1] === fromC &&
+          currentStep.to[0] === toR && currentStep.to[1] === toC) {
+        
+        ladderStepIndex++;
+
+        // Check for opponent auto response
+        if (ladderStepIndex < levelData.solution.length && levelData.solution[ladderStepIndex].auto) {
+          const autoStep = levelData.solution[ladderStepIndex].auto;
+          addLog('Escalera', '¡Movimiento correcto! El oponente responde...', 'system');
+          
+          setTimeout(() => {
+            const p = board[autoStep.from[0]][autoStep.from[1]];
+            board[autoStep.to[0]][autoStep.to[1]] = p;
+            board[autoStep.from[0]][autoStep.from[1]] = '';
+            ladderStepIndex++;
+
+            turn = 'white';
+            renderBoard();
+
+            if (ladderStepIndex >= levelData.solution.length) {
+              completeLadderLevel();
+            } else {
+              addLog('Escalera', 'Tu turno: realiza el siguiente movimiento de jaque mate.', 'system');
+            }
+          }, 450);
+        } else if (ladderStepIndex >= levelData.solution.length) {
+          completeLadderLevel();
+        } else {
+          addLog('Escalera', '¡Excelente movimiento! Continúa la secuencia de mate.', 'system');
+        }
+      } else {
+        addLog('Escalera', '❌ Movimiento incorrecto. Reiniciando la posición para que vuelvas a intentarlo.', 'system');
+        document.getElementById('ladder-status').innerText = "Movimiento erróneo. ¡Inténtalo de nuevo!";
+        setTimeout(() => {
+          selectLadderLevel(currentLadderLevel);
+        }, 700);
+      }
+    }
+
+    function completeLadderLevel() {
+      addLog('Escalera', `🎉 <b>¡JAQUE MATE LOGRADO!</b> Has superado el Nivel ${currentLadderLevel}: ${LADDER_DATA[currentLadderLevel - 1].title}`, 'system');
+      document.getElementById('ladder-status').innerText = "¡Nivel Completado con Éxito! 🏆";
+
+      if (currentLadderLevel < 10) {
+        setTimeout(() => {
+          selectLadderLevel(currentLadderLevel + 1);
+        }, 1400);
+      } else {
+        addLog('Escalera', '👑 <b>¡ENHORABUENA!</b> Has completado toda la Escalera de Mates Tácticos (Niveles 1 a 10).', 'system');
+      }
+    }
+
+    // -------------------------------------------------------------
+    // CHECKMATE LADDER ENGINE
+    // -------------------------------------------------------------
+    function renderLadderSteps() {
+      const container = document.getElementById('ladder-steps-container');
+      container.innerHTML = '';
+      for (let i = 1; i <= 10; i++) {
+        const btn = document.createElement('button');
+        btn.className = `py-1.5 text-xs font-black rounded-lg border transition ${i === currentLadderLevel ? 'bg-amber-500 text-slate-950 border-amber-400 shadow' : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'}`;
+        btn.innerText = `${i}º`;
+        btn.onclick = () => selectLadderLevel(i);
+        container.appendChild(btn);
+      }
+    }
+
+    function selectLadderLevel(lvl) {
+      currentLadderLevel = lvl;
+      ladderStepIndex = 0;
+      renderLadderSteps();
+
+      const levelData = LADDER_DATA[lvl - 1];
+      document.getElementById('ladder-level-badge').innerText = `Nivel ${lvl}: ${levelData.title}`;
+      document.getElementById('ladder-desc').innerText = levelData.hint;
+      document.getElementById('ladder-status').innerText = "Toca las piezas para intentar dar el jaque mate perfecto.";
+
+      // Load specific position to board
+      const parsed = parseFEN(levelData.setup);
+      board = parsed.board;
+      turn = parsed.turn;
+      selectedSquare = null;
+
+      renderBoard();
+      addLog('Escalera de Mates', `¡Nivel ${lvl} cargado! Posición activa lista en el tablero. Desafío: <b>${levelData.title}</b>`, 'system');
+    }
+
+    function getLadderHint() {
+      const levelData = LADDER_DATA[currentLadderLevel - 1];
+      addLog('Pista', `💡 ${levelData.hint}`, 'system');
+    }
+
+    // STYLE TEST ENGINE (5 PREGUNTAS - 25+ GMs)
+    // -------------------------------------------------------------
+    function renderStyleQuiz() {
+      const container = document.getElementById('style-quiz-body');
+      quizAnswers = [];
+      container.innerHTML = STYLE_QUESTIONS.map((q, idx) => `
+        <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800/80 space-y-2">
+          <p class="text-xs font-bold text-slate-200">${q.q}</p>
+          <div class="space-y-1.5">
+            ${q.opts.map((opt, optIdx) => `
+              <button id="q-${idx}-opt-${optIdx}" onclick="answerQuizOption(${idx}, ${optIdx}, '${opt.trait}')" class="w-full text-left p-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600/30 hover:border-indigo-500/50 text-xs text-slate-300 border border-slate-800 transition flex items-center justify-between">
+                <span>${opt.text}</span>
+                <i class="fa-regular fa-circle text-slate-600 text-xs"></i>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function answerQuizOption(qIdx, optIdx, trait) {
+      quizAnswers[qIdx] = trait;
+
+      // Update UI selection highlights for this question
+      STYLE_QUESTIONS[qIdx].opts.forEach((_, i) => {
+        const btn = document.getElementById(`q-${qIdx}-opt-${i}`);
+        if (btn) {
+          if (i === optIdx) {
+            btn.className = "w-full text-left p-2.5 rounded-xl bg-indigo-600/30 border-indigo-500 text-xs text-white border transition flex items-center justify-between font-semibold";
+            btn.querySelector('i').className = "fa-solid fa-circle-check text-indigo-400 text-xs";
+          } else {
+            btn.className = "w-full text-left p-2.5 rounded-xl bg-slate-900 hover:bg-indigo-600/30 hover:border-indigo-500/50 text-xs text-slate-300 border border-slate-800 transition flex items-center justify-between";
+            btn.querySelector('i').className = "fa-regular fa-circle text-slate-600 text-xs";
+          }
+        }
+      });
+
+      // If all 5 questions are answered, calculate matching GM
+      if (quizAnswers.filter(Boolean).length === 5) {
+        const counts = {};
+        quizAnswers.forEach(t => counts[t] = (counts[t] || 0) + 1);
+        let topTrait = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+        
+        const candidates = GM_DATABASE[topTrait] || GM_DATABASE.attacker;
+        const matchedGM = candidates[Math.floor(Math.random() * candidates.length)];
+        const allGMsCount = Object.values(GM_DATABASE).flat().length;
+
+        addLog('Resultado del Test', `🏆 ¡Test de 5 Preguntas Completado!<br>Tu perfil dominante es <b>${topTrait.toUpperCase()}</b>.<br>Tu juego se asemeja al del Gran Maestro <b>${matchedGM}</b> (entre una base de ${allGMsCount} Leyendas del Ajedrez).`, 'system');
+      }
+    }
+
+    // -------------------------------------------------------------
+    // OTHER UTILITY MODES
+    // -------------------------------------------------------------
+    function loadNextPuzzle() {
+      puzzleScore += 15;
+      document.getElementById('puzzle-score-badge').innerText = `Puntos: ${puzzleScore}`;
+      addLog('Puzzle Maestro', '¡Acertijo completado con éxito! (+15 pts). Cargar nuevo patrón táctico.', 'system');
+    }
+
+    function toggleBlindfoldManual() {
+      blindfoldActive = document.getElementById('toggle-blindfold-cb').checked;
+      renderBoard();
+    }
+
+    function startBlitzChallenge() {
+      blitzSeconds = 30;
+      clearInterval(blitzTimer);
+      blitzTimer = setInterval(() => {
+        blitzSeconds--;
+        document.getElementById('blitz-timer-display').innerText = `${blitzSeconds}s`;
+        if (blitzSeconds <= 0) {
+          clearInterval(blitzTimer);
+          addLog('Blitz', '¡Tiempo agotado! Revisa la posición final.', 'system');
+        }
+      }, 1000);
+    }
+
+    function renderEditorPalette() {
+      const palette = document.getElementById('editor-palette');
+      const pieceKeys = ['P','N','B','R','Q','K','p','n','b','r','q','k',''];
+      palette.innerHTML = pieceKeys.map(k => `
+        <button onclick="editorSelectedPiece='${k}'" class="w-9 h-9 flex items-center justify-center text-xl bg-slate-900 border border-slate-800 rounded-lg hover:bg-slate-800">
+          ${getPieceHTML(k) || '❌'}
+        </button>
+      `).join('');
+    }
+
+    function clearEditorBoard() {
+      board = Array(8).fill(null).map(() => Array(8).fill(''));
+      renderBoard();
+    }
+
+    // -------------------------------------------------------------
+    // FEEDBACK FORM SUBMISSION HANDLER
+    // -------------------------------------------------------------
+    function submitFeedback(e) {
+      e.preventDefault();
+      const type = document.getElementById('feedback-type').value;
+      const author = document.getElementById('feedback-author').value.trim() || 'Jugador Anónimo';
+      const msg = document.getElementById('feedback-msg').value.trim();
+
+      if (!msg) return;
+
+      const typeLabels = {
+        'sugerencia': '💡 Sugerencia',
+        'error': '🐛 Reporte de Error',
+        'felicitacion': '⭐ Felicitación'
+      };
+
+      addLog(`Buzón (${typeLabels[type]})`, `<b>${author}</b> escribió: "${msg}"`, 'system');
+
+      document.getElementById('feedback-msg').value = '';
+      const sentBox = document.getElementById('feedback-sent-msg');
+      sentBox.classList.remove('hidden');
+
+      setTimeout(() => {
+        sentBox.classList.add('hidden');
+      }, 4000);
+    }
+
+    // -------------------------------------------------------------
+    // CHAT & LOGGING SYSTEM
+    // -------------------------------------------------------------
+    function addLog(author, text, type) {
+      const chatBox = document.getElementById('chat-box');
+      const msg = document.createElement('div');
+      
+      let borderClass = "border-indigo-500 bg-indigo-950/30";
+      if (type === 'user') borderClass = "border-cyan-500 bg-cyan-950/30";
+      if (type === 'gm') borderClass = "border-amber-500 bg-amber-950/30";
+
+      msg.className = `p-2.5 rounded-xl border-l-4 ${borderClass} text-slate-200 space-y-0.5 text-xs`;
+      msg.innerHTML = `
+        <div class="flex justify-between items-center text-[10px] text-slate-400 font-bold uppercase">
+          <span>${author}</span>
+        </div>
+        <div class="leading-relaxed">${text}</div>
+      `;
+
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function clearLog() {
+      document.getElementById('chat-box').innerHTML = '';
+    }
+
+    // -------------------------------------------------------------
+    // TAB SWITCHER
+    // -------------------------------------------------------------
+    function switchTab(tab) {
+      currentTab = tab;
+      blindfoldActive = false;
+
+      // Update button highlights
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.className = "tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-slate-800/80 text-slate-400 hover:text-white hover:bg-slate-700 transition-all whitespace-nowrap";
+      });
+      document.getElementById(`tab-${tab}`).className = "tab-btn px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 bg-indigo-600 text-white shadow-lg transition-all whitespace-nowrap";
+
+      // Hide panels
+      document.querySelectorAll('.mode-panel').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`panel-${tab}`).classList.remove('hidden');
+
+      // Update mode badge if element exists
+      const modeBadge = document.getElementById('mode-badge');
+      if (modeBadge) {
+        modeBadge.innerText = tab.toUpperCase();
+      }
+
+      clearLog();
+
+      if (tab === 'zero') {
+        board = JSON.parse(JSON.stringify(INITIAL_BOARD));
+        turn = 'white';
+        renderZeroLesson();
+        renderBoard();
+      } else if (tab === 'ladder') {
+        selectLadderLevel(currentLadderLevel);
+      } else if (tab === 'style') {
+        board = JSON.parse(JSON.stringify(INITIAL_BOARD));
+        turn = 'white';
+        renderStyleQuiz();
+        renderBoard();
+      } else if (tab === 'editor') {
+        renderEditorPalette();
+        renderBoard();
+      } else {
+        board = JSON.parse(JSON.stringify(INITIAL_BOARD));
+        turn = 'white';
+        renderBoard();
+      }
+
+      addLog('ChessMind', `Modo activado: <b>${tab.toUpperCase()}</b>. Creado por Juan Rodriguero (11 años).`, 'system');
+    }
+
+    function resetBoardMode() {
+      switchTab(currentTab);
+    }
+
+    function flipBoard() {
+      isFlipped = !isFlipped;
+      renderBoard();
+    }
+
+    function initSimGame() {
+      resetBoardMode();
+    }
+
+    // INITIALIZATION ON LOAD
+    window.onload = function() {
+      renderBoard();
+      addLog('Entrenador ChessMind', '¡Bienvenido! Proyecto creado por Juan Rodriguero (11 años). Elige tu tema de tablero preferido (20+ opciones) y explora los 8 modos de entrenamiento.', 'system');
+    };
+  </script>
+</body>
+</html>
